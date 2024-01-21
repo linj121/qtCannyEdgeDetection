@@ -16,20 +16,24 @@ VideoStreamer::~VideoStreamer()
 
 void VideoStreamer::catchFrame(cv::Mat emittedFrame)
 {
+    pipeline.clear();
 
-    if(m_cannyEnabled)
-    {
-        cv::Mat cannyOut;
-        cv::Canny(emittedFrame, cannyOut, m_cannyThreshold1.toDouble(), m_cannyThreshold2.toDouble());
-        QImage imgIn= QImage((uchar*) cannyOut.data, cannyOut.cols, cannyOut.rows, cannyOut.step, QImage::Format_Grayscale8).rgbSwapped();
-        emit emitQImage(imgIn);
+    QImage::Format imageFormat = QImage::Format_RGB888;
+
+    if (m_cannyEnabled) {
+        pipeline.push_back([this](const cv::Mat& frame) { return this->applyCanny(frame); });
+        imageFormat = QImage::Format_Grayscale8;
     }
-    else
-    {
-        QImage imgIn= QImage((uchar*) emittedFrame.data, emittedFrame.cols, emittedFrame.rows, emittedFrame.step, QImage::Format_RGB888).rgbSwapped();
-        emit emitQImage(imgIn);
+    if (m_flipEnabled) {
+        pipeline.push_back([this](const cv::Mat& frame) { return this->applyFlip(frame); });
     }
 
+    for (auto& func : pipeline) {
+        emittedFrame = func(emittedFrame);
+    }
+
+    QImage imgIn = QImage((uchar*) emittedFrame.data, emittedFrame.cols, emittedFrame.rows, emittedFrame.step, imageFormat).rgbSwapped();
+    emit emitQImage(imgIn);
 }
 
 void VideoStreamer::openVideoCamera(QString path)
@@ -38,10 +42,6 @@ void VideoStreamer::openVideoCamera(QString path)
         cap.open(path.toInt());
     else
         cap.open(path.toStdString());
-
-
-
-
 
     VideoStreamer* worker = new VideoStreamer();
     worker->moveToThread(threadStreamer);
@@ -112,4 +112,31 @@ void VideoStreamer::setCannyEnabled(bool newCannyEnabled)
         return;
     m_cannyEnabled = newCannyEnabled;
     emit cannyEnabledChanged(m_cannyEnabled);
+}
+
+bool VideoStreamer::flipEnabled() const
+{
+    return m_flipEnabled;
+}
+
+void VideoStreamer::setFlipEnabled(bool newFlipEnabled)
+{
+    if (m_flipEnabled == newFlipEnabled)
+        return;
+    m_flipEnabled = newFlipEnabled;
+    emit flipEnabledChanged(m_flipEnabled);
+}
+
+cv::Mat VideoStreamer::applyCanny(const cv::Mat& frame)
+{
+    cv::Mat cannyOut;
+    cv::Canny(frame, cannyOut, m_cannyThreshold1.toDouble(), m_cannyThreshold2.toDouble());
+    return cannyOut;
+}
+
+cv::Mat VideoStreamer::applyFlip(const cv::Mat& frame)
+{
+    cv::Mat flipOut;
+    cv::flip(frame, flipOut, 1);
+    return flipOut;
 }

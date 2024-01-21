@@ -4,7 +4,7 @@
 PaintItem::PaintItem(QQuickItem *parent):  QQuickPaintedItem(parent)
 {
     imageToSend = new QImage(200,200,QImage::Format_RGB32);
-    imageToSend->fill(QColor("black"));
+    imageToSend->fill(QColor("#415a77"));
 }
 
 void PaintItem::streamVideo(VideoStreamer *streamerThreadSlot)
