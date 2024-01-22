@@ -9,7 +9,7 @@ Window {
     height: 480
     visible: true
     title: qsTr("Webcam Viewer")
-    color: "lightblue"
+    color: "#0d1b2a"
 
     Rectangle{
         id: imageRect
@@ -21,7 +21,7 @@ Window {
         height: 300
 
         color: "transparent"
-        border.color: "black"
+        border.color: "#e0e1dd"
         border.width: 3
 
         PaintItem {
@@ -37,6 +37,7 @@ Window {
         anchors.bottom: cameraRect.top
         anchors.left: cameraRect.left
         anchors.margins: 5
+        color: "#e0e1dd"
     }
 
     Rectangle{
@@ -47,7 +48,8 @@ Window {
         anchors.topMargin: 50
         width: 200
         height: 50
-        border.color: "black"
+        color: "#415a77"
+        border.color: "#e0e1dd"
         border.width: 3
         ColumnLayout{
             anchors.centerIn: parent
@@ -55,13 +57,10 @@ Window {
                 spacing: 10
                 Button{
                     id: startButton
-                    text: "Open"
+                    text: "Play"
                     width: 100
                     height: 45
-                    onClicked: {
-                        VideoStreamer.openVideoCamera(videoPath.text)
-                        // opencvImage.visible = true
-                    }
+                    onClicked: VideoStreamer.openVideoCamera(videoPath.text)
                 }
                 TextField{
                     id:videoPath
@@ -75,27 +74,65 @@ Window {
     }
 
     Text{
-        text: qsTr("Canny Edge Detection Setting")
-        anchors.bottom: cannyRect.top
-        anchors.left: cannyRect.left
+        text: qsTr("Horizontal Image Flip")
+        anchors.bottom: flipRect.top
+        anchors.left: flipRect.left
         anchors.margins: 5
+        color: "#e0e1dd"
     }
 
     Rectangle{
-        id: cannyRect
+        id: flipRect
         anchors.left: parent.left
         anchors.leftMargin: 50
         anchors.top: cameraRect.bottom
         anchors.topMargin: 50
         width: 200
         height: 75
-        border.color: "black"
+        color: "#415a77"
+        border.color: "#e0e1dd"
         border.width: 3
         ColumnLayout{
             anchors.centerIn: parent
             RowLayout{
                 Text{
+                    text: qsTr("Flip Horizontally:")
+                    color: "#e0e1dd"
+                }
+                CheckBox{
+                    checked: VideoStreamer.flipEnabled
+                    onCheckedChanged: VideoStreamer.flipEnabled = checked
+                }
+            }
+        }
+    }
+
+    Text{
+        text: qsTr("Canny Edge Detection")
+        anchors.bottom: cannyRect.top
+        anchors.left: cannyRect.left
+        anchors.margins: 5
+        color: "#e0e1dd"
+    }
+
+    Rectangle{
+        id: cannyRect
+        anchors.left: parent.left
+        anchors.leftMargin: 50
+        anchors.top: flipRect.bottom
+        anchors.topMargin: 50
+        width: 200
+        height: 75
+        color: "#415a77"
+        border.color: "#e0e1dd"
+        border.width: 3
+
+        ColumnLayout{
+            anchors.centerIn: parent
+            RowLayout{
+                Text{
                     text: qsTr("Canny Enabled:")
+                    color: "#e0e1dd"
                 }
                 CheckBox{
                     checked: VideoStreamer.cannyEnabled
@@ -108,10 +145,12 @@ Window {
                 Text{
                     text: qsTr("Threshold 1")
                     width: 80
+                    color: "#e0e1dd"
                 }
                 Text{
                     text: qsTr("Threshold 2")
                     width: 80
+                    color: "#e0e1dd"
                 }
             }
             RowLayout{
